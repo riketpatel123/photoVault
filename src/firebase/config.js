@@ -1,22 +1,24 @@
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/storage';
-import 'firebase/compat/firestore';
+import { initializeApp } from 'firebase/app';
+import { getStorage } from 'firebase/storage';
+import { getFirestore, serverTimestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "firegram-d1340.firebaseapp.com",
   projectId: "firegram-d1340",
   storageBucket: "firegram-d1340.appspot.com",
   messagingSenderId: "375861097503",
-  appId: process.env.FIREBASE_APP_ID
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
+console.log(process.env);
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-const projectStorage = firebase.storage();
-const projectFirestore = firebase.firestore();
-const timestamp = firebase.firestore.FieldValue.serverTimestamp;
+const projectStorage = getStorage(app);
+const projectFirestore = getFirestore(app);
+const projectAuth = getAuth(app);
 
-export { projectStorage, projectFirestore, timestamp };
+export { projectStorage, projectFirestore, serverTimestamp, projectAuth };

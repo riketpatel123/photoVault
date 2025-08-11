@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import ProgressBar from './ProgressBar';
+import { useAuth } from '../contexts/AuthContext';
 
 const UploadForm = () => {
-
+  const { currentUser } = useAuth();
   const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
 
@@ -21,17 +22,24 @@ const UploadForm = () => {
   };
 
   return (
-    <form>
-      <label>
-        <input type="file" onChange={changeHandler} />
-        <span>+</span>
-      </label>
-      <div className='ourput'>
-        {error && <div className='error'>{error}</div>}
-        {file && <div>{file.name}</div>}
-        {file && <ProgressBar file={file} setFile={setFile} />}
-      </div>
-    </form>
+    <>
+      {currentUser ? ( // Conditionally render the form
+        <form>
+          <label className='file-label'>
+            <input className='file-input' type="file" onChange={changeHandler} />
+            <span>+</span>
+          </label>
+          <div className='output'>
+            {error && <div className='error'>{error}</div>}
+            {file && <div>{file.name}</div>}
+            {file && <ProgressBar file={file} setFile={setFile} />}
+          </div>
+        </form>
+      ) : (
+        <p>Please log in to upload an image.</p>
+      )}
+    </>
+
   );
 };
 

@@ -1,23 +1,36 @@
 import { useState, useEffect } from 'react';
 import { projectFirestore } from '../firebase/config';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
-const useFirestore = (collection) => {
+const useFirestore = (collectionName) => {
   const [docs, setDocs] = useState([]);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    const unsub = projectFirestore.collection(collection)
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(snap => {
-        let documents = [];
-        snap.forEach(doc => {
-          documents.push({ ...doc.data(), id: doc.id });
-        });
-        setDocs(documents);
-      });
+    if (!currentUser) { // 3. Don't query if there's no user
+      setDocs([]);
+      return;
+    }
+    // Create a reference to the collection
+    const collRef = collection(projectFirestore, collectionName);
 
-    return () => unsub();
+    // Create a query against the collection, ordering by 'createdAt'
+    const q = query(collRef, where('userId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
 
-  }, [collection]);
+    // Set up the real-time listener
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const documents = querySnapshot.docs.map(doc => ({
+        ...doc.data(),
+        id: doc.id
+      }));
+      setDocs(documents);
+    });
+
+    // Unsubscribe from the listener when the component unmounts
+    return () => unsubscribe();
+
+  }, [collectionName, currentUser]);
 
   return { docs };
 };
